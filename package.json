@@ -1,0 +1,41 @@
+{
+  "name": "kicc-visitor-registry",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "description": "KICC visitor registration \u2014 Cloudflare Worker API on TiDB (MySQL) with a D1 fallback, plus a static front-end",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "verify": "node scripts/verify.mjs",
+    "test": "node --experimental-sqlite scripts/test-data-layer.mjs",
+    "test:nosqlite": "node scripts/test-data-layer.mjs",
+    "deploy": "node scripts/build.mjs && node scripts/verify.mjs && node scripts/test-data-layer.mjs && wrangler deploy --config worker/wrangler.toml",
+    "deploy:only": "wrangler deploy --config worker/wrangler.toml",
+    "dev": "wrangler dev --config worker/wrangler.toml",
+    "tail": "wrangler tail --config worker/wrangler.toml",
+    "db:check": "node scripts/db-migrate.mjs --check",
+    "db:tidb": "node scripts/db-migrate.mjs --seed",
+    "db:tidb:schema": "node scripts/db-migrate.mjs",
+    "db:sqlite": "wrangler d1 migrations apply kicc-registry --remote --config worker/wrangler.toml",
+    "db:sqlite:local": "wrangler d1 migrations apply kicc-registry --local --config worker/wrangler.toml",
+    "db:query": "wrangler d1 execute kicc-registry --remote --config worker/wrangler.toml --command \"SELECT id, name, event_id, checked_in, created_at FROM registrations ORDER BY created_at DESC LIMIT 20\"",
+    "secrets:generate": "node scripts/generate-secrets.mjs",
+    "hash-passcode": "node scripts/hash-passcode.mjs",
+    "qr": "node scripts/build.mjs",
+    "test:data": "node --experimental-sqlite scripts/test-data-layer.mjs",
+    "db:tidb:check": "node scripts/db-migrate.mjs --check",
+    "db:tidb:migrate": "node scripts/db-migrate.mjs",
+    "db:tidb:seed": "node scripts/db-migrate.mjs --seed",
+    "db:seed:mysql:local": "node scripts/db-migrate.mjs --seed"
+  },
+  "dependencies": {
+    "@tidbcloud/serverless": "^0.3.0"
+  },
+  "devDependencies": {
+    "jsqr": "^1.4.0",
+    "node-sql-parser": "^5.3.13",
+    "qrcode-generator": "^1.4.4",
+    "wrangler": "^4.149.0",
+    "@tidbcloud/serverless": "^0.3.0"
+  }
+}

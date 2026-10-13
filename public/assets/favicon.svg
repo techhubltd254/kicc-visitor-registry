@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="KICC">
+  <rect width="64" height="64" rx="12" fill="#0B2536"/>
+  <rect x="26" y="10" width="13" height="44" fill="#962228"/>
+  <g fill="#EAA816">
+    <rect x="10" y="14" width="12" height="4"/>
+    <rect x="10" y="22" width="12" height="4"/>
+    <rect x="10" y="30" width="12" height="4"/>
+    <rect x="10" y="38" width="12" height="4"/>
+    <polygon points="32,42 16,54 48,54"/>
+  </g>
+</svg>

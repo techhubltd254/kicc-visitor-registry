@@ -1,0 +1,76 @@
+#:schema node_modules/wrangler/config-schema.json
+# =====================================================================
+#  KICC Visitor Registration — Cloudflare Worker + D1 + static assets
+#  Deploy:  npm run deploy        (runs the build first, then wrangler)
+#  Secrets are NEVER stored here. See .dev.vars.example and README.md.
+# =====================================================================
+
+name = "kicc-visitor-registry"
+main = "src/index.js"
+compatibility_date = "2025-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# ---------- static front-end (the public/ folder) ----------
+[assets]
+directory = "../public"
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
+
+# ---------- D1 database ----------
+[[d1_databases]]
+binding = "DB"
+database_name = "kicc-registry"
+# Fill this in after `wrangler d1 create kicc-registry`
+database_id = "a9f59135-195f-43df-8863-76dfc51b62c4"
+migrations_dir = "migrations"
+
+# ---------- R2 bucket (badge PDFs, exports, backups) ----------
+[[r2_buckets]]
+binding = "BADGES"
+bucket_name = "kicc-badges"
+
+# ---------- cron: drain the outbound sync queue every 10 minutes ----------
+[triggers]
+crons = ["*/10 * * * *"]
+
+# ---------- non-secret variables ----------
+[vars]
+# NOTE: ADMIN_PASSCODE_HASH is intentionally absent from [vars]: an empty entry
+# here SHADOWS the secret binding and silently breaks admin login.
+# NOTE: ADMIN_PASSCODE_HASH is intentionally absent. An empty [vars] entry
+# SHADOWS the secret binding and silently breaks admin login — it must only
+# ever exist as a `wrangler secret put` value.
+ENVIRONMENT = "production"
+PUBLIC_SITE_URL = "https://kiccvisitorsregistration.co.ke"
+ALLOWED_ORIGINS = "https://kiccvisitorsregistration.co.ke,https://techhubltd254.github.io,https://kicc-visitor-registry.techhubltd254.workers.dev"
+EMAIL_PROVIDER = "none"          # resend | mailchannels | webhook | none
+# NOTE: ADMIN_PASSCODE_HASH is deliberately NOT set here. An empty [vars]
+# entry SHADOWS the secret binding and silently breaks admin login —
+# it must only ever exist as a `wrangler secret put` value.
+
+# ---------- observability ----------
+[observability]
+enabled = true
+
+# =====================================================================
+#  Secrets — set these with `wrangler secret put <NAME>`, never here:
+#
+#    SESSION_SECRET            long random string, signs admin sessions
+#    QR_SIGNING_SECRET         long random string, signs delegate QR badges
+#    IP_SALT                   long random string, salts IP hashes
+#    ADMIN_PASSCODE_HASH       sha256 of your passcode (preferred)
+#    RESEND_API_KEY            email provider credential
+#    SHEETS_WEBHOOK_URL        Google Apps Script /exec URL
+#    SHEETS_SHARED_SECRET      shared secret checked by the Apps Script
+#    TIDC_ACCOUNT_ID / TIDC_PUBLIC_KEY / TIDC_PRIVATE_KEY / TIDC_API_BASE
+# =====================================================================
+
+# ---------- environments ----------
+[env.staging]
+name = "kicc-visitor-registry-staging"
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+PUBLIC_SITE_URL = "https://staging.kiccvisitorsregistration.co.ke"
+ALLOWED_ORIGINS = "https://kiccvisitorsregistration.co.ke,https://techhubltd254.github.io,https://kicc-visitor-registry.techhubltd254.workers.dev"
+EMAIL_PROVIDER = "none"

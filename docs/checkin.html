@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Door check-in | KICC</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0B2536">
+<link rel="icon" href="/kicc-visitor-registry/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/kicc-visitor-registry/assets/base.css">
+</head>
+<body class="page">
+
+<header class="topbar" data-kicc-header></header>
+
+<section class="hero slim">
+  <div class="wrap">
+    <span class="eyebrow">Accreditation desk</span>
+    <h1>Door check-in</h1>
+    <p>Scan a delegate's QR badge with this device, or type their registration number. Every scan is recorded with a timestamp and gate.</p>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+    <div class="grid">
+
+      <div class="card">
+        <h2><span class="bar"></span>Scan a badge</h2>
+        <p class="sub">Camera frames are decoded on this device only — no images are uploaded.</p>
+
+        <div class="field" style="max-width:320px">
+          <label for="gate">Gate / entrance</label>
+          <select id="gate"></select>
+        </div>
+
+        <div class="scanner" id="scanner">
+          <video id="video" playsinline muted></video>
+          <div class="frame"></div>
+          <div class="laser"></div>
+        </div>
+
+        <div class="actions" style="justify-content:center;margin-top:14px">
+          <button class="btn btn-primary" id="btnStart" type="button">Start camera</button>
+          <button class="btn btn-ghost" id="btnStop" type="button" disabled>Stop</button>
+        </div>
+
+        <div class="verdict" id="verdict"></div>
+      </div>
+
+      <aside class="side">
+        <div class="card">
+          <h2><span class="bar"></span>Manual entry</h2>
+          <p class="sub">Use this if a badge will not scan or a delegate has no phone.</p>
+          <form id="manualForm">
+            <div class="field">
+              <label for="manualCode">Registration number</label>
+              <input type="text" id="manualCode" placeholder="KICC-2610-A7K2" autocapitalize="characters">
+            </div>
+            <button class="btn btn-gold btn-block" type="submit">Check in</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="note">
+            <strong>Badge signature.</strong> Each badge carries an HMAC signature, so a QR code that was not issued by this system is rejected as a possible forgery.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="note info">
+            Full register, search and CSV export are in the <a href="/kicc-visitor-registry/admin.html">organiser console</a>.
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</main>
+
+<footer data-kicc-footer></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/kicc-visitor-registry/assets/vendor/jsQR.js"></script>
+<script src="/kicc-visitor-registry/assets/config.js"></script>
+<script src="/kicc-visitor-registry/assets/theme.js"></script>
+<script src="/kicc-visitor-registry/checkin.js"></script>
+</body>
+</html>

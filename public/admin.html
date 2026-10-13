@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Organiser console | KICC</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0B2536">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/base.css">
+</head>
+<body class="page">
+
+<header class="topbar" data-kicc-header></header>
+
+<section class="hero slim">
+  <div class="wrap">
+    <span class="eyebrow">Events team</span>
+    <h1>Organiser console</h1>
+    <p>Live registry, attendance, exports and event management for KICC visitor registration.</p>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+
+    <div class="gate card" id="gateCard">
+      <h2><span class="bar"></span>Organiser access</h2>
+      <p class="sub">Enter the organiser passcode to open the registry.</p>
+      <div class="field">
+        <label for="passcode">Passcode</label>
+        <input type="password" id="passcode" placeholder="••••••••" autocomplete="current-password">
+        <p class="err" id="err-passcode">Incorrect passcode.</p>
+      </div>
+      <button class="btn btn-primary btn-block" id="btnUnlock" type="button">Unlock registry</button>
+    </div>
+
+    <div id="adminPanel" style="display:none">
+      <div class="stats">
+        <div class="stat"><b id="sTotal">0</b><span>Registrations</span></div>
+        <div class="stat ok"><b id="sIn">0</b><span>Checked in</span></div>
+        <div class="stat gold"><b id="sEvents">0</b><span>Events</span></div>
+        <div class="stat red"><b id="sToday">0</b><span>Today</span></div>
+      </div>
+
+      <div class="card">
+        <h2><span class="bar"></span>Attendance register</h2>
+        <p class="sub">Search, check delegates in, and export for reporting.</p>
+
+        <div class="toolbar">
+          <input type="search" id="search" placeholder="Search name, email, phone or reg. number">
+          <select id="filterEvent"><option value="">All events</option></select>
+          <select id="filterStatus">
+            <option value="">All statuses</option>
+            <option value="in">Checked in</option>
+            <option value="out">Not checked in</option>
+          </select>
+          <select id="filterCategory">
+            <option value="">All categories</option>
+          </select>
+          <button class="btn btn-gold btn-sm" id="btnExport" type="button">Export CSV</button>
+          <button class="btn btn-ghost btn-sm" id="btnRefresh" type="button">Refresh</button>
+          <button class="btn btn-ghost btn-sm" id="btnDrain" type="button">Retry sync queue</button>
+          <button class="btn btn-ghost btn-sm" id="btnLock" type="button">Lock</button>
+        </div>
+
+        <div class="tablewrap">
+          <table id="regTable">
+            <thead>
+              <tr>
+                <th>Reg. number</th><th>Delegate</th><th>Contact</th><th>Event</th>
+                <th>Registered</th><th>Status</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="regBody"></tbody>
+          </table>
+          <div class="empty" id="emptyState">
+            <b>No registrations yet</b>
+            Share the QR code from the registration page and records will appear here.
+          </div>
+        </div>
+
+        <div class="pager">
+          <button class="btn btn-ghost btn-sm" id="btnPrev" type="button">Previous</button>
+          <span class="sub" style="margin:0" id="pageInfo"></span>
+          <button class="btn btn-ghost btn-sm" id="btnNext" type="button">Next</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="bar"></span>Integrations</h2>
+        <p class="sub" id="queueNote">Loading…</p>
+        <div class="note info">
+          Failed email, Google Sheets or TIDC pushes are retried automatically every 10 minutes by a scheduled Worker.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="bar"></span>By event</h2>
+        <div class="summary" id="byEvent"></div>
+      </div>
+
+      <div class="card">
+        <h2><span class="bar"></span>Event manager</h2>
+        <p class="sub">Events created here appear immediately on the registration form. Editing <code>config/event.config.json</code> is the versioned way to seed them.</p>
+        <button class="btn btn-gold btn-sm" id="btnNewEvent" type="button">Add an event</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer data-kicc-footer></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/assets/config.js"></script>
+<script src="/assets/theme.js"></script>
+<script src="/admin.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var sel = document.getElementById('filterCategory');
+    (window.KICC.config.registration.categories || []).forEach(function (c) {
+      var o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o);
+    });
+  });
+</script>
+</body>
+</html>

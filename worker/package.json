@@ -1,0 +1,30 @@
+{
+  "name": "kicc-visitor-registry",
+  "version": "1.0.0",
+  "private": true,
+  "description": "KICC visitor registration — Cloudflare Worker API + D1 + static front-end",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "predeploy": "node scripts/build.mjs",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging",
+    "dev": "wrangler dev",
+    "tail": "wrangler tail",
+    "db:create": "wrangler d1 create kicc-registry",
+    "db:init": "wrangler d1 migrations apply kicc-registry --remote",
+    "db:init:local": "wrangler d1 migrations apply kicc-registry --local",
+    "db:seed:local": "wrangler d1 execute kicc-registry --local --file=migrations/0002_seed_events.sql",
+    "db:shell": "wrangler d1 execute kicc-registry --remote --command=\"SELECT id, name, event_id, checked_in, created_at FROM registrations ORDER BY created_at DESC LIMIT 20\"",
+    "r2:create": "wrangler r2 bucket create kicc-badges",
+    "hash-passcode": "node scripts/hash-passcode.mjs",
+    "secrets:generate": "node scripts/generate-secrets.mjs",
+    "qr": "node scripts/make-qr.mjs",
+    "verify": "node scripts/verify.mjs"
+  },
+  "devDependencies": {
+    "qrcode-generator": "^1.4.4",
+    "jsqr": "^1.4.0",
+    "wrangler": "^4.0.0"
+  }
+}

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy notice | KICC Visitor Registration</title>
+<meta name="description" content="How The Kenyatta International Convention Centre processes visitor registration data under the Kenya Data Protection Act, 2019.">
+<meta name="theme-color" content="#0B2536">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/base.css">
+</head>
+<body class="page">
+
+<header class="topbar" data-kicc-header></header>
+
+<section class="hero slim">
+  <div class="wrap">
+    <span class="eyebrow">Data protection</span>
+    <h1>Privacy notice</h1>
+    <p>How KICC handles the information you provide when registering to visit or attend an event.</p>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+    <div class="grid wide">
+      <div class="card">
+        <h2><span class="bar"></span>What we collect</h2>
+        <ul class="steplist" style="font-size:15px">
+          <li>Your <strong>full name, email address and mobile phone number</strong>.</li>
+          <li>Your <strong>organisation</strong>, <strong>country</strong> and, where required, an <strong>ID or passport number</strong> for security clearance.</li>
+          <li>The <strong>event, registration category and days</strong> you plan to attend.</li>
+          <li>Any <strong>accessibility or dietary requirements</strong> you choose to tell us about.</li>
+          <li>A record of whether you have <strong>checked in</strong>, with the time and gate.</li>
+        </ul>
+
+        <h2 style="margin-top:22px"><span class="bar"></span>Why we collect it</h2>
+        <p>We process your data to issue your visitor pass, to manage event accreditation and capacity, to meet building security requirements at KICC, and to maintain attendance records for reporting to event organisers and sponsors in aggregate form.</p>
+
+        <h2 style="margin-top:22px"><span class="bar"></span>Lawful basis</h2>
+        <p>We rely on your <strong>consent</strong>, which you give by ticking the consent box on the registration form, and on our <strong>legitimate interest</strong> in maintaining the security of the KICC precinct. You may withdraw consent at any time by contacting us, though we may still need to retain minimal attendance records to meet legal and security obligations.</p>
+
+        <h2 style="margin-top:22px"><span class="bar"></span>How long we keep it</h2>
+        <p>Registration records are retained for the duration of the event and for a reasonable period afterwards for reporting and security purposes, after which they are deleted or anonymised.</p>
+
+        <h2 style="margin-top:22px"><span class="bar"></span>Who we share it with</h2>
+        <p>Access is limited to authorised KICC events, security and accreditation staff, and to the organiser of the event you registered for. We do not sell your data. Where a service provider processes data on our behalf — for example our email delivery provider — they do so under contract and only on our instructions.</p>
+
+        <h2 style="margin-top:22px"><span class="bar"></span>Your rights</h2>
+        <p>Under the <strong>Kenya Data Protection Act, 2019</strong> you have the right to be informed, to access your data, to correct inaccurate data, to request erasure, to object to processing, and to data portability. To exercise any of these rights, contact the KICC events desk.</p>
+
+        <div class="note info" style="margin-top:20px">
+          <strong>Contact.</strong> <span id="supportLine"></span> — or email the events desk using the address published on the KICC website.
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer data-kicc-footer></footer>
+
+<script src="/assets/config.js"></script>
+<script src="/assets/theme.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.KICC.renderChrome('');
+    var el = document.getElementById('supportLine');
+    if (el && window.KICC.config) {
+      el.textContent = window.KICC.config.site.supportPhone + ' · ' + window.KICC.config.site.supportEmail;
+    }
+  });
+</script>
+</body>
+</html>

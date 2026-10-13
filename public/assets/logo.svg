@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 200" role="img" aria-label="The Kenyatta International Convention Centre logo">
+  <!-- KICC lockup: brick-red wordmark, tower with gold ladder, amphitheatre roof -->
+  <g>
+    <!-- K -->
+    <path d="M0 18 H34 V92 L84 18 H126 L70 100 L130 182 H86 L34 108 V182 H0 Z" fill="#962228"/>
+    <!-- I as the KICC tower -->
+    <rect x="150" y="18" width="34" height="164" fill="#962228"/>
+    <g fill="#EAA816">
+      <rect x="118" y="26"  width="26" height="9"/>
+      <rect x="118" y="44"  width="26" height="9"/>
+      <rect x="118" y="62"  width="26" height="9"/>
+      <rect x="118" y="80"  width="26" height="9"/>
+      <rect x="118" y="98"  width="26" height="9"/>
+      <rect x="118" y="116" width="26" height="9"/>
+      <rect x="118" y="134" width="26" height="9"/>
+    </g>
+    <!-- amphitheatre roof -->
+    <polygon points="167,140 116,182 218,182" fill="#EAA816"/>
+    <!-- C -->
+    <path d="M330 18 C280 18 250 54 250 100 C250 146 280 182 330 182 C356 182 378 172 392 156 L368 132 C359 143 346 150 331 150 C305 150 288 128 288 100 C288 72 305 50 331 50 C346 50 359 57 368 68 L392 44 C378 28 356 18 330 18 Z" fill="#962228"/>
+    <!-- C -->
+    <path d="M520 18 C470 18 440 54 440 100 C440 146 470 182 520 182 C546 182 568 172 582 156 L558 132 C549 143 536 150 521 150 C495 150 478 128 478 100 C478 72 495 50 521 50 C536 50 549 57 558 68 L582 44 C568 28 546 18 520 18 Z" fill="#962228"/>
+  </g>
+</svg>

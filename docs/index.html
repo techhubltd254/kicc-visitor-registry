@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Register to visit KICC | The Kenyatta International Convention Centre</title>
+<meta name="description" content="Register to visit or attend an event at The Kenyatta International Convention Centre (KICC), Nairobi, Kenya. Your visitor pass and QR badge are issued instantly.">
+<meta name="theme-color" content="#0B2536">
+<link rel="icon" href="/kicc-visitor-registry/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/kicc-visitor-registry/assets/base.css">
+</head>
+<body class="page">
+
+<header class="topbar" data-kicc-header></header>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="eyebrow" id="heroEyebrow">Visitor &amp; Delegate Registration</span>
+    <h1 id="heroTitle">Register to visit KICC</h1>
+    <p id="heroSub"></p>
+    <div class="chips" id="heroChips"></div>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+    <div class="grid">
+
+      <div class="card">
+        <h2><span class="bar"></span>Visitor registration</h2>
+        <p class="sub">Fields marked <span class="req">*</span> are required.</p>
+
+        <div class="note red" id="closedNote" style="display:none;margin-bottom:16px"></div>
+        <div class="note red" id="dupNote" style="display:none;margin-bottom:16px"></div>
+
+        <form id="regForm" novalidate>
+          <div class="row">
+            <div class="field">
+              <label for="fullName">Full name <span class="req">*</span></label>
+              <input type="text" id="fullName" autocomplete="name" placeholder="e.g. Amina Wanjiru Otieno">
+              <p class="err" id="err-fullName">Please enter your first and last name.</p>
+            </div>
+            <div class="field">
+              <label for="email">Email address <span class="req">*</span></label>
+              <input type="email" id="email" autocomplete="email" placeholder="you@organisation.co.ke">
+              <p class="err" id="err-email">Please enter a valid email address.</p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="phone">Mobile phone <span class="req">*</span></label>
+              <input type="tel" id="phone" autocomplete="tel" placeholder="+254 7XX XXX XXX">
+              <p class="err" id="err-phone">Enter a phone number with 9 to 15 digits.</p>
+            </div>
+            <div class="field">
+              <label for="org">Organisation / Company</label>
+              <input type="text" id="org" autocomplete="organization" placeholder="Optional">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="country">Country</label>
+              <select id="country"></select>
+            </div>
+            <div class="field">
+              <label for="docId">ID / Passport number</label>
+              <input type="text" id="docId" placeholder="For security clearance">
+              <p class="err" id="err-docId">An ID or passport number is required.</p>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="event">Event you are attending <span class="req">*</span></label>
+            <select id="event"><option value="">Loading events…</option></select>
+            <p class="err" id="err-event">Please select the event you are attending.</p>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="category">Registration category <span class="req">*</span></label>
+              <select id="category"><option value="">— Select —</option></select>
+              <p class="err" id="err-category">Please choose a registration category.</p>
+            </div>
+            <div class="field">
+              <label for="attendDays">Days attending</label>
+              <select id="attendDays"></select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="needs">Accessibility or dietary requirements</label>
+            <textarea id="needs" placeholder="e.g. wheelchair access, halal meal, sign-language interpretation"></textarea>
+          </div>
+
+          <div class="field">
+            <label class="check" for="consent">
+              <input type="checkbox" id="consent">
+              <span><span id="consentText">I consent to KICC processing the details above.</span> <span class="req">*</span>
+              <a href="/kicc-visitor-registry/privacy.html" id="privacyLink">Privacy notice</a></span>
+            </label>
+            <p class="err" id="err-consent">Consent is required before we can register you.</p>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="btnSubmit">Submit registration</button>
+        </form>
+
+        <div class="success" id="successBox" role="status" aria-live="polite">
+          <div class="tick">✓</div>
+          <h2 style="display:flex;justify-content:center">You are registered</h2>
+          <p class="sub">Keep this number — it is your fast-track pass at the accreditation desk.</p>
+          <div class="regid" id="outRegId">—</div>
+          <div id="qrMini" style="max-width:170px;margin:0 auto"></div>
+          <div class="summary" id="outSummary"></div>
+          <div class="actions" style="justify-content:center;margin-top:16px">
+            <a class="btn btn-gold" id="btnBadge" href="#">Open my QR badge</a>
+            <button class="btn btn-ghost" id="btnPrint" type="button">Print / save</button>
+            <button class="btn btn-ghost" id="btnAnother" type="button">Register another</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="side">
+        <div class="card qrbox">
+          <h2 style="justify-content:center;display:flex"><span class="bar"></span>Scan to register</h2>
+          <p class="sub">Point a phone camera here to open this page.</p>
+          <div class="qr-holder">
+            <img id="qrImg" src="/kicc-visitor-registry/assets/qr-register.svg" alt="QR code linking to the KICC registration page">
+          </div>
+          <p class="qrurl" id="qrUrlLabel"></p>
+        </div>
+
+        <div class="card">
+          <h2><span class="bar"></span>Before you arrive</h2>
+          <ul class="steplist">
+            <li><strong>Bring your ID</strong> — the document number you registered with.</li>
+            <li><strong>Arrive early</strong> — accreditation opens 60 minutes before the session.</li>
+            <li><strong>Security screening</strong> applies at all KICC entrances.</li>
+            <li><strong>Parking</strong> at the KICC basement and the adjacent City Hall car park.</li>
+            <li><strong>Enquiries</strong> — <span id="supportLine"></span></li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="note info">
+            Your confirmation email contains a QR badge. Show it — or your registration number — at the door.
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</main>
+
+<footer data-kicc-footer></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/kicc-visitor-registry/assets/vendor/qrcode.js"></script>
+<script src="/kicc-visitor-registry/assets/config.js"></script>
+<script src="/kicc-visitor-registry/assets/theme.js"></script>
+<script src="/kicc-visitor-registry/register.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    if (window.KICC.config) {
+      document.getElementById('qrUrlLabel').textContent = window.KICC.config.site.url;
+    }
+  });
+</script>
+</body>
+</html>

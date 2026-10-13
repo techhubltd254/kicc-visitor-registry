@@ -1,0 +1,48 @@
+# =====================================================================
+#  KICC Visitor Registration — local development secrets
+#
+#  Copy this file to  .dev.vars  and fill in real values.
+#  .dev.vars is git-ignored and is NEVER committed or deployed.
+#  For production, set each one with:  wrangler secret put <NAME>
+#
+#  Generate the random secrets with:  npm run secrets:generate
+# =====================================================================
+
+# ---- database (REQUIRED for TiDB) -----------------------------------
+# The MySQL connection string for your TiDB Cloud cluster.
+# Console → your cluster → Connect → "MySQL" tab shows it.
+#
+#   mysql://<user>.root:<password>@<host>:4000/kicc_registry?ssl={"rejectUnauthorized":true}
+#
+# Quote the whole value: it contains characters the .env parser would
+# otherwise split on. Leave it EMPTY to run on the D1 fallback instead.
+DATABASE_URL=""
+
+# ---- signing secrets (REQUIRED) ----
+SESSION_SECRET="paste-a-long-random-string-here"
+QR_SIGNING_SECRET="paste-a-different-long-random-string-here"
+IP_SALT="paste-a-third-random-string-here"
+
+# ---- admin access ----
+# Preferred: a SHA-256 hash, so the passcode itself never lives in config.
+# Generate with:  npm run hash-passcode -- "your-new-passcode"
+ADMIN_PASSCODE_HASH=""
+# Simple fallback used only if ADMIN_PASSCODE_HASH is empty:
+ADMIN_PASSCODE=""
+
+# ---- email (EMAIL_PROVIDER = resend) ----
+RESEND_API_KEY=""
+
+# ---- email via your own webhook (EMAIL_PROVIDER = webhook) ----
+EMAIL_WEBHOOK_URL=""
+EMAIL_WEBHOOK_SECRET=""
+
+# ---- Google Sheets (Apps Script Web App /exec URL) ----
+SHEETS_WEBHOOK_URL=""
+SHEETS_SHARED_SECRET=""
+
+# ---- public, non-secret ----
+PUBLIC_SITE_URL="http://localhost:8787"
+ALLOWED_ORIGINS="http://localhost:8787,http://127.0.0.1:8787"
+ENVIRONMENT="development"
+EMAIL_PROVIDER="none"

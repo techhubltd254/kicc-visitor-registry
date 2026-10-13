@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My badge | KICC</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0B2536">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/base.css">
+</head>
+<body class="page">
+
+<header class="topbar" data-kicc-header></header>
+
+<section class="hero slim">
+  <div class="wrap">
+    <span class="eyebrow">Delegate badge</span>
+    <h1>Your KICC visitor badge</h1>
+    <p>Show this at the accreditation desk. You can print it or save the QR code to your phone.</p>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+    <div class="grid wide">
+      <div class="card">
+        <div id="badgeHost"><p class="sub">Loading your badge…</p></div>
+        <div class="actions no-print" id="badgeActions" style="justify-content:center;margin-top:18px;display:none">
+          <button class="btn btn-primary" id="btnPrint" type="button">Print badge</button>
+          <button class="btn btn-ghost" id="btnDownload" type="button">Download QR (SVG)</button>
+          <a class="btn btn-ghost" href="/">Back to registration</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer data-kicc-footer></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/assets/vendor/qrcode.js"></script>
+<script src="/assets/config.js"></script>
+<script src="/assets/theme.js"></script>
+<script src="/badge.js"></script>
+</body>
+</html>
