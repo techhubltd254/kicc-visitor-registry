@@ -1,7 +1,6 @@
 {
   "$schema": "./event.config.schema.json",
   "_comment": "SINGLE SOURCE OF TRUTH. Edit this file, then run `npm run build` (it syncs worker/src/config.json and public/assets/config.js and regenerates the QR codes).",
-
   "site": {
     "name": "KICC Visitor Registration",
     "organisation": "The Kenyatta International Convention Centre",
@@ -14,7 +13,6 @@
     "logo": "assets/logo.svg",
     "favicon": "assets/favicon.svg"
   },
-
   "brand": {
     "red": "#962228",
     "redDark": "#6E1820",
@@ -29,25 +27,26 @@
     "bg": "#F7F4EF",
     "ok": "#1E7A4B"
   },
-
   "hero": {
     "eyebrow": "Visitor & Delegate Registration",
     "title": "Register to visit KICC",
     "subtitle": "Complete the short form to secure your visitor pass. Your registration number and QR badge are issued instantly — show them at the accreditation desk on arrival.",
-    "chips": ["KICC, Nairobi · Harambee Avenue", "Free delegate registration", "QR badge issued instantly"]
+    "chips": [
+      "KICC, Nairobi · Harambee Avenue",
+      "Free delegate registration",
+      "QR badge issued instantly"
+    ]
   },
-
   "features": {
     "duplicateEmailBlock": true,
     "emailConfirmation": true,
-    "googleSheetsSync": true,
+    "googleSheetsSync": false,
     "qrBadge": true,
     "doorCheckIn": true,
     "tidcSync": false,
     "requireIdNumber": false,
     "rateLimitPerHour": 12
   },
-
   "registration": {
     "open": true,
     "closedMessage": "Registration for this event is currently closed. Please contact the KICC events desk.",
@@ -64,15 +63,40 @@
       "Service Provider",
       "Government Official"
     ],
-    "dayOptions": ["All days", "Day 1 only", "Day 2 only", "Day 3 only"],
+    "dayOptions": [
+      "All days",
+      "Day 1 only",
+      "Day 2 only",
+      "Day 3 only"
+    ],
     "countries": [
-      "Kenya", "Uganda", "Tanzania", "Rwanda", "Burundi", "South Sudan", "Ethiopia",
-      "Somalia", "South Africa", "Nigeria", "Ghana", "Egypt", "United Kingdom",
-      "United States", "United Arab Emirates", "India", "China", "Germany", "France",
-      "Netherlands", "Canada", "Australia", "Japan", "Brazil", "Other"
+      "Kenya",
+      "Uganda",
+      "Tanzania",
+      "Rwanda",
+      "Burundi",
+      "South Sudan",
+      "Ethiopia",
+      "Somalia",
+      "South Africa",
+      "Nigeria",
+      "Ghana",
+      "Egypt",
+      "United Kingdom",
+      "United States",
+      "United Arab Emirates",
+      "India",
+      "China",
+      "Germany",
+      "France",
+      "Netherlands",
+      "Canada",
+      "Australia",
+      "Japan",
+      "Brazil",
+      "Other"
     ]
   },
-
   "email": {
     "provider": "resend",
     "fromName": "KICC Events",
@@ -81,10 +105,9 @@
     "subject": "Your KICC registration — {{regId}}",
     "attachIcs": true
   },
-
   "integrations": {
     "googleSheets": {
-      "enabled": true,
+      "enabled": false,
       "webhookEnvVar": "SHEETS_WEBHOOK_URL",
       "secretEnvVar": "SHEETS_SHARED_SECRET",
       "sheetName": "KICC Registrations"
@@ -99,16 +122,20 @@
       "note": "UNVERIFIED PROVIDER — the supplied TIDC ID / Public Key / Private Key do not match any publicly documented API. The adapter is a pluggable stub: set the env vars and TIDC_API_BASE and implement the request shape in worker/src/lib/tidc.js once the provider's docs are available."
     }
   },
-
   "admin": {
     "sessionHours": 12,
     "pageSize": 50
   },
-
   "checkin": {
-    "gates": ["Main Entrance", "Tsavo Ballroom", "Lenana Hall", "Aberdare Hall", "VIP Lounge", "Media Centre"]
+    "gates": [
+      "Main Entrance",
+      "Tsavo Ballroom",
+      "Lenana Hall",
+      "Aberdare Hall",
+      "VIP Lounge",
+      "Media Centre"
+    ]
   },
-
   "events": [
     {
       "id": "kicc-visitors-open",

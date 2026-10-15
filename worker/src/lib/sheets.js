@@ -55,6 +55,24 @@ export async function syncToSheets(env, record, event, cfg) {
     redirect: 'follow'
   });
 
-  if (!res.ok) throw new Error(`sheets webhook ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  return { synced: true };
+  const text = await res.text();
+  if (!res.ok) throw new Error(`sheets webhook ${res.status}: ${text.slice(0, 200)}`);
+
+  // Apps Script ALWAYS replies HTTP 200 — even when it rejects the request, and
+  // even when the deployment requires sign-in and returns a Google login page.
+  // So HTTP status is useless here; the body is the only real signal. Anything
+  // that is not {"ok":true} is thrown, which pushes the row onto the cron retry
+  // queue with the reason, instead of reporting success and silently losing it.
+  let data = null;
+  try { data = JSON.parse(text); } catch (e) { data = null; }
+  if (!data) {
+    const looksHtml = /^\s*(<!DOCTYPE|<html)/i.test(text);
+    throw new Error(
+      `sheets webhook returned ${looksHtml
+        ? 'HTML — deployment is not publicly accessible; set "Who has access" to "Anyone"'
+        : 'non-JSON'}: ${text.slice(0, 120)}`
+    );
+  }
+  if (data.ok === false) throw new Error(`sheets rejected: ${data.error || 'unknown'}`);
+  return { synced: true, duplicate: Boolean(data.duplicate) };
 }

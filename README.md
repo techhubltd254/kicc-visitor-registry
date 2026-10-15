@@ -237,25 +237,6 @@ comes from the config, so the email restyles when the site does.
 
 ---
 
-## Connecting Google Sheets
-
-1. Create a Google Sheet and name the tab `KICC Registrations`.
-2. **Extensions → Apps Script**, delete the stub, paste `scripts/apps-script/Code.gs`.
-3. Set `SHARED_SECRET` in that file to a long random string.
-4. **Deploy → New deployment → Web app** — *Execute as: Me*, *Who has access: Anyone*. Copy the `/exec` URL.
-5. Store it:
-
-```bash
-npx wrangler secret put SHEETS_WEBHOOK_URL    --config worker/wrangler.toml
-npx wrangler secret put SHEETS_SHARED_SECRET  --config worker/wrangler.toml
-```
-
-Every registration is then appended as a row, in the background. The script is
-idempotent — re-running a sync never duplicates a row. Turn it off with
-`features.googleSheetsSync: false` in the config.
-
----
-
 ## TIDC — provider unverified
 
 A TIDC credential set (numeric account id, short public key, UUID private key)

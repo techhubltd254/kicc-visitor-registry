@@ -40,7 +40,7 @@
   "features": {
     "duplicateEmailBlock": true,
     "emailConfirmation": true,
-    "googleSheetsSync": true,
+    "googleSheetsSync": false,
     "qrBadge": true,
     "doorCheckIn": true,
     "tidcSync": false,
@@ -107,7 +107,7 @@
   },
   "integrations": {
     "googleSheets": {
-      "enabled": true,
+      "enabled": false,
       "webhookEnvVar": "SHEETS_WEBHOOK_URL",
       "secretEnvVar": "SHEETS_SHARED_SECRET",
       "sheetName": "KICC Registrations"
