@@ -9,7 +9,6 @@
  */
 
 import { sendConfirmationEmail } from './email.js';
-import { syncToSheets } from './sheets.js';
 import {
   insertAudit,
   insertSyncJob,

@@ -70,7 +70,6 @@ are retried with exponential backoff.
 | Visitor registration form | `public/index.html` + `register.js` | Server-validated, mobile-first |
 | **Duplicate-email blocking** | `worker/src/index.js` + D1 unique index | Friendly 409 with the existing registration number, enforced by the database as a backstop |
 | **Automatic confirmation email** | `worker/src/lib/email.js` + `templates/confirmation.js` | Resend, MailChannels or your own webhook; branded HTML + plain text, sent in the background |
-| **Google Sheets backend** | `worker/src/lib/sheets.js` + `scripts/apps-script/Code.gs` | Every registration appended to a Sheet; idempotent, never double-writes |
 | **Per-delegate QR badge** | `worker/src/lib/badge.js` + `public/badge.html` | HMAC-signed token; a badge cannot be forged |
 | **Door check-in** | `public/checkin.html` + `checkin.js` | Camera scanning (vendored jsQR) with manual fallback, per-gate logging, vibrate feedback |
 | Organiser console | `public/admin.html` + `admin.js` | KPIs, search, filters, pagination, check-in/undo, delete |
@@ -112,7 +111,6 @@ are retried with exponential backoff.
 │   ├── verify.mjs               secret scan + pre-deploy checks
 │   ├── generate-secrets.mjs     random signing secrets
 │   ├── hash-passcode.mjs        passcode → SHA-256
-│   └── apps-script/Code.gs      paste into Google Apps Script
 └── .dev.vars.example            template for local secrets (never committed)
 ```
 

@@ -38,8 +38,6 @@ EMAIL_WEBHOOK_URL=""
 EMAIL_WEBHOOK_SECRET=""
 
 # ---- Google Sheets (Apps Script Web App /exec URL) ----
-SHEETS_WEBHOOK_URL=""
-SHEETS_SHARED_SECRET=""
 
 # ---- public, non-secret ----
 PUBLIC_SITE_URL="http://localhost:8787"
