@@ -32,7 +32,7 @@ export function preflight(request, env) {
   const origin = allowedOrigin(request, env);
   const h = {
     'access-control-allow-methods': 'GET,POST,PATCH,DELETE,OPTIONS',
-    'access-control-allow-headers': 'content-type,authorization,x-admin-token,x-sheets-secret',
+    'access-control-allow-headers': 'content-type,authorization,x-admin-token',
     'access-control-max-age': '86400',
     vary: 'Origin'
   };

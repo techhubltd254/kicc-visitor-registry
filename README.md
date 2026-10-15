@@ -47,7 +47,6 @@ deploy.
                       ┌─────▼─────┐  ┌─────▼─────┐  ┌─────▼──────┐
                       │ D1        │  │ R2        │  │ waitUntil()│
                       │ registry  │  │ exports   │  │ email ·    │
-                      │ + audit   │  │ + badges  │  │ Sheets ·   │
                       └───────────┘  └───────────┘  │ TIDC       │
                                                      └─────┬──────┘
                                         cron */10 ─────────┘
@@ -55,7 +54,6 @@ deploy.
 ```
 
 **Why it scales.** Cloudflare Workers run at the edge with no servers to size,
-D1 is a managed SQLite database, and every outbound integration (email, Sheets,
 TIDC) runs *after* the response inside `ctx.waitUntil()` and is retried by a
 cron trigger. A slow Google Sheet or a dead mail API never delays a delegate at
 the desk, and no registration is ever lost — failures land in `sync_queue` and
@@ -103,7 +101,7 @@ are retried with exponential backoff.
 │   └── src/
 │       ├── index.js             router
 │       ├── config.json          generated from config/event.config.json
-│       ├── lib/                 http, crypto, badge, email, sheets, tidc, sync
+│       ├── lib/                 http, crypto, badge, email, tidc, sync
 │       ├── routes/admin.js      admin API
 │       └── templates/           confirmation email
 ├── scripts/
@@ -279,7 +277,6 @@ Almost everything lives in `config/event.config.json`. Edit it, run
 | `site` | Organisation name, tagline, address, support phone/email, public URL |
 | `brand` | Every colour on the site, the badge, the email and the poster |
 | `hero` | Headline, sub-headline, chips |
-| `features` | Toggle duplicate blocking, email, Sheets, QR badges, TIDC, rate limit |
 | `registration` | Categories, day options, countries, consent wording, open/closed |
 | `email` | Sender name/address, reply-to, subject template |
 | `checkin.gates` | The entrance list on the door scanner |

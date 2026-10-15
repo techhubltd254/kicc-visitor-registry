@@ -32,7 +32,6 @@ export const SORTABLE = {
 /** Columns processRegistration may flip after a successful outbound sync. */
 export const FLAG_COLUMNS = {
   email: 'email_sent',
-  sheets: 'sheets_synced',
   tidc: 'tidc_synced'
 };
 

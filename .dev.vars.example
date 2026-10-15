@@ -37,8 +37,6 @@ RESEND_API_KEY=""
 EMAIL_WEBHOOK_URL=""
 EMAIL_WEBHOOK_SECRET=""
 
-# ---- Google Sheets (Apps Script Web App /exec URL) ----
-
 # ---- public, non-secret ----
 PUBLIC_SITE_URL="http://localhost:8787"
 ALLOWED_ORIGINS="http://localhost:8787,http://127.0.0.1:8787"

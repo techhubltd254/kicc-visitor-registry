@@ -166,7 +166,6 @@ export async function adminRoute(path, request, env, ctx, cfg, db) {
       queue: await queueStats(db),
       integrations: {
         email: env.EMAIL_PROVIDER || 'none',
-        sheets: Boolean(cfg.integrations.googleSheets.enabled && env.SHEETS_WEBHOOK_URL)
       }
     });
   }
@@ -215,7 +214,7 @@ export async function adminRoute(path, request, env, ctx, cfg, db) {
       'Reg. number', 'Full name', 'Email', 'Phone', 'Organisation', 'Country', 'ID/Passport',
       'Event', 'Event dates', 'Venue', 'Category', 'Days', 'Requirements', 'Consent',
       'Registered at', 'Checked in', 'Checked in at', 'Gate', 'Checked in by',
-      'Email sent', 'Sheets synced'
+      'Email sent'
     ];
 
     const body = rows.map((r) => [
@@ -223,7 +222,7 @@ export async function adminRoute(path, request, env, ctx, cfg, db) {
       r.event_name || r.event_id, r.event_dates, r.event_venue, r.category, r.days, r.needs,
       num(r.consent) ? 'Yes' : 'No', r.created_at, num(r.checked_in) ? 'Yes' : 'No',
       r.checked_in_at, r.checked_in_gate, r.checked_in_by,
-      num(r.email_sent) ? 'Yes' : 'No', num(r.sheets_synced) ? 'Yes' : 'No'
+      num(r.email_sent) ? 'Yes' : 'No'
     ]);
 
     const a = insertAudit({

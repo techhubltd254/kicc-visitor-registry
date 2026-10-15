@@ -78,7 +78,6 @@ const browserCfg = {
   registration: cfg.registration,
   checkin: cfg.checkin,
   integrations: {
-    googleSheets: { enabled: cfg.integrations.googleSheets.enabled },
     tidc: { enabled: cfg.integrations.tidc.enabled, verified: cfg.integrations.tidc.verified }
   }
 };
@@ -255,7 +254,6 @@ console.log(`
   Events        : ${cfg.events.length}
   Duplicate block: ${cfg.features.duplicateEmailBlock ? 'on' : 'off'}
   Email         : ${cfg.features.emailConfirmation ? 'on' : 'off'}
-  Sheets sync   : ${cfg.features.googleSheetsSync ? 'on' : 'off'}
   QR badges     : ${cfg.features.qrBadge ? 'on' : 'off'}
   TIDC sync     : ${cfg.features.tidcSync ? 'ON (provider unverified!)' : 'off'}
 `);

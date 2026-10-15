@@ -60,8 +60,6 @@ enabled = true
 #    IP_SALT                   long random string, salts IP hashes
 #    ADMIN_PASSCODE_HASH       sha256 of your passcode (preferred)
 #    RESEND_API_KEY            email provider credential
-#    SHEETS_WEBHOOK_URL        Google Apps Script /exec URL
-#    SHEETS_SHARED_SECRET      shared secret checked by the Apps Script
 #    TIDC_ACCOUNT_ID / TIDC_PUBLIC_KEY / TIDC_PRIVATE_KEY / TIDC_API_BASE
 # =====================================================================
 

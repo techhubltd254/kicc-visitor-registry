@@ -40,7 +40,6 @@ window.KICC_CONFIG = {
   "features": {
     "duplicateEmailBlock": true,
     "emailConfirmation": true,
-    "googleSheetsSync": false,
     "qrBadge": true,
     "doorCheckIn": true,
     "tidcSync": false,
@@ -108,9 +107,6 @@ window.KICC_CONFIG = {
     ]
   },
   "integrations": {
-    "googleSheets": {
-      "enabled": true
-    },
     "tidc": {
       "enabled": false,
       "verified": false

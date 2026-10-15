@@ -52,7 +52,6 @@ function publicConfig() {
     checkin: config.checkin,
     database: config.database,
     integrations: {
-      googleSheets: { enabled: config.integrations.googleSheets.enabled }
     }
   };
 }
@@ -204,7 +203,7 @@ async function register(request, env, ctx, db) {
   });
   await db.run(audit.sql, audit.params);
 
-  // Never block the delegate's confirmation on email or Sheets.
+  // Never block the delegate's confirmation on email.
   ctx.waitUntil(processRegistration(db, env, stored, event, cfg));
 
   const siteUrl = (env.PUBLIC_SITE_URL || cfg.site.url).replace(/\/$/, '');
@@ -351,7 +350,6 @@ export default {
             time: new Date().toISOString(),
             database: dbStatus(env),
             emailProvider: env.EMAIL_PROVIDER || 'none',
-            sheets: Boolean(cfg.integrations.googleSheets.enabled && env.SHEETS_WEBHOOK_URL)
           })
         );
       }

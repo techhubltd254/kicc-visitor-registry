@@ -47,7 +47,6 @@ CREATE TABLE IF NOT EXISTS registrations (
   user_agent       TEXT,
   ip_hash          TEXT,                          -- salted SHA-256, never the raw IP
   email_sent       INTEGER NOT NULL DEFAULT 0,
-  sheets_synced    INTEGER NOT NULL DEFAULT 0,
   tidc_synced      INTEGER NOT NULL DEFAULT 0,
   notes            TEXT,
   created_at       TEXT NOT NULL DEFAULT (datetime('now')),
@@ -76,11 +75,11 @@ CREATE TABLE IF NOT EXISTS audit_log (
 
 CREATE INDEX IF NOT EXISTS idx_audit_at ON audit_log(at DESC);
 
--- ---------- outbound sync queue (email / Sheets / TIDC retries) ----------
+-- ---------- outbound sync queue (email / TIDC retries) ----------
 CREATE TABLE IF NOT EXISTS sync_queue (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   reg_id      TEXT NOT NULL,
-  target      TEXT NOT NULL,                      -- 'email' | 'sheets' | 'tidc'
+  target      TEXT NOT NULL,                      -- 'email' | 'tidc'
   payload     TEXT,
   attempts    INTEGER NOT NULL DEFAULT 0,
   last_error  TEXT,

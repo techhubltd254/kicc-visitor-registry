@@ -52,7 +52,6 @@ CREATE TABLE IF NOT EXISTS registrations (
   user_agent       VARCHAR(250)      NULL,
   ip_hash          VARCHAR(32)       NULL,        -- salted SHA-256, never the raw IP
   email_sent       TINYINT(1)    NOT NULL DEFAULT 0,
-  sheets_synced    TINYINT(1)    NOT NULL DEFAULT 0,
   tidc_synced      TINYINT(1)    NOT NULL DEFAULT 0,
   notes            TEXT              NULL,
   created_at       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -79,7 +78,7 @@ CREATE TABLE IF NOT EXISTS audit_log (
   KEY idx_audit_at (at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ---------- outbound sync queue (email / Sheets / TIDC retries) ----------
+-- ---------- outbound sync queue (email / TIDC retries) ----------
 CREATE TABLE IF NOT EXISTS sync_queue (
   id          BIGINT       NOT NULL AUTO_INCREMENT,
   reg_id      VARCHAR(24)  NOT NULL,

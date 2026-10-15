@@ -41,7 +41,6 @@
     var q = res.data.queue || {};
     document.getElementById('queueNote').innerHTML =
       'Email provider: <strong>' + window.KICC.esc(res.data.integrations.email) + '</strong> · ' +
-      'Google Sheets: <strong>' + (res.data.integrations.sheets ? 'connected' : 'not connected') + '</strong> · ' +
       'TIDC: <strong>' + (res.data.integrations.tidc.enabled ? 'enabled' : 'disabled') + '</strong><br>' +
       'Sync queue — pending: <strong>' + (q.pending || 0) + '</strong>, failed: <strong>' + (q.failed || 0) + '</strong>';
 

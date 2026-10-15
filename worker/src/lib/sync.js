@@ -2,7 +2,7 @@
  * Outbound sync orchestration + retry queue.
  *
  * processRegistration() runs inside ctx.waitUntil() so a delegate never waits
- * on email or Google Sheets. Any failure is written to sync_queue and retried
+ * on email. Any failure is written to sync_queue and retried
  * by the cron trigger, so no record is ever silently lost.
  *
  * Every statement comes from lib/queries.js, so this module is engine-agnostic.
@@ -39,9 +39,6 @@ export async function processRegistration(db, env, record, event, cfg) {
   if (cfg.features.emailConfirmation) {
     jobs.push(attempt('email', () => sendConfirmationEmail(env, record, event, cfg)));
   }
-  if (cfg.features.googleSheetsSync) {
-    jobs.push(attempt('sheets', () => syncToSheets(env, record, event, cfg)));
-  }
 
   const results = await Promise.all(jobs);
   const summary = {};
@@ -51,7 +48,7 @@ export async function processRegistration(db, env, record, event, cfg) {
 
     const skipped = r.ok && r.res && r.res.skipped;
     if (r.ok && !skipped) {
-      const q = setSyncFlag(record.id, r.target === 'email' ? 'email_sent' : 'sheets_synced', true, now);
+      const q = setSyncFlag(record.id, 'email_sent', true, now);
       if (q) await db.run(q.sql, q.params);
     } else if (!r.ok) {
       const q = insertSyncJob({
@@ -100,14 +97,13 @@ export async function drainQueue(db, env, cfg, limit = 25) {
 
     const r = await attempt(job.target, async () => {
       if (job.target === 'email') return sendConfirmationEmail(env, reg, event, cfg);
-      if (job.target === 'sheets') return syncToSheets(env, reg, event, cfg);
       throw new Error(`unknown sync target: ${job.target}`);
     });
 
     if (r.ok) {
       const flag = setSyncFlag(
         reg.id,
-        job.target === 'email' ? 'email_sent' : 'sheets_synced',
+        'email_sent',
         true,
         sqlDateTime()
       );
