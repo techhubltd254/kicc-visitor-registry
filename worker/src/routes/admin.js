@@ -97,6 +97,10 @@ async function requireAdmin(request, env) {
   return await verifySession(env, token);
 }
 
+/* Best-effort in-process lockout counter keyed by IP hash. Cloudflare reuses
+   warm isolates, so this trips immediately even if the audit-log read lags. */
+const loginFailures = new Map();
+
 /* ------------------------------------------------------------------ routes */
 
 export async function adminRoute(path, request, env, ctx, cfg, db) {
@@ -107,14 +111,24 @@ export async function adminRoute(path, request, env, ctx, cfg, db) {
   /* ---- login / logout / session ---- */
   if (path === '/api/admin/login' && method === 'POST') {
     const body = await readJson(request);
-    /* --- brute-force guard: per-IP lockout, counted from audit_log ---------- */
+    /* --- brute-force guard: dual layer -------------------------------------
+       (1) in-process counter — trips immediately inside a warm isolate;
+       (2) audit_log count — survives isolate recycling across colos. */
     const lockoutMinutes = Number((cfg.admin && cfg.admin.lockoutMinutes) || 15);
     const maxFails = Number((cfg.admin && cfg.admin.maxFailedLogins) || 8);
-    const since = sqlDateTime(new Date(Date.now() - lockoutMinutes * 60000));
     const ipHash = await hashIp(clientIp(request), envSecret(env, 'IP_SALT') || envSecret(env, 'SESSION_SECRET') || 'kicc');
-    const failsQ = countFailedLogins(ipHash, since);
-    const fails = await db.first(failsQ.sql, failsQ.params);
-    if (num(fails && fails.n) >= maxFails) {
+    const windowStart = Date.now() - lockoutMinutes * 60000;
+    const recent = (loginFailures.get(ipHash) || []).filter((t) => t > windowStart);
+
+    let dbFails = 0;
+    try {
+      const q = countFailedLogins(ipHash, sqlDateTime(new Date(windowStart)));
+      const row = await db.first(q.sql, q.params);
+      dbFails = num(row && row.n);
+    } catch (e) {
+      console.error('lockout count failed:', (e && e.message) || e);
+    }
+    if (recent.length >= maxFails || dbFails >= maxFails) {
       return fail(
         `Too many failed sign-in attempts. Try again in ${lockoutMinutes} minutes.`,
         429,
@@ -132,8 +146,10 @@ export async function adminRoute(path, request, env, ctx, cfg, db) {
         at: now()
       });
       await db.run(a.sql, a.params).catch((e) => console.error('audit insert failed:', (e && e.message) || e));
+      loginFailures.set(ipHash, [...recent, Date.now()]);
       return fail('Incorrect passcode.', 401);
     }
+    loginFailures.delete(ipHash);
     const token = await issueSession(env, cfg.admin.sessionHours);
     const a = insertAudit({ actor: 'admin', action: 'login', at: now() });
     await db.run(a.sql, a.params).catch((e) => console.error('audit insert failed:', (e && e.message) || e));
