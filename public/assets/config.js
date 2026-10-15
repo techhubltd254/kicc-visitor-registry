@@ -44,7 +44,7 @@ window.KICC_CONFIG = {
     "doorCheckIn": true,
     "tidcSync": false,
     "requireIdNumber": false,
-    "rateLimitPerHour": 12
+    "rateLimitPerHour": 0
   },
   "registration": {
     "open": true,

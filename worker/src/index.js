@@ -28,7 +28,16 @@ import { newRegistrationId } from './lib/crypto.js';
 import { makeDb, dbStatus, sqlDateTime, hoursAgo, num } from './lib/db.js';
 import { makeBadgeToken, resolveBadge } from './lib/badge.js';
 import { processRegistration, drainQueue } from './lib/sync.js';
-import { adminRoute } from './routes/admin.js';
+import { adminRoute, adminSession } from './routes/admin.js';
+
+/** /api/health hides the database host and database name from anonymous
+ *  callers — they are returned only to a signed-in organiser. */
+async function healthDbStatus(request, env) {
+  const status = dbStatus(env);
+  const session = await adminSession(request, env);
+  if (session) return status;
+  return { backend: status.backend, driver: status.driver, configured: status.configured };
+}
 import {
   listEvents as listEventsQuery,
   findEvent,
@@ -349,7 +358,7 @@ const workerHandler = {
             service: 'kicc-visitor-registry',
             environment: env.ENVIRONMENT || 'development',
             time: new Date().toISOString(),
-            database: dbStatus(env),
+            database: await healthDbStatus(request, env),
             emailProvider: env.EMAIL_PROVIDER || 'none',
           })
         );
@@ -379,7 +388,27 @@ const workerHandler = {
       }
 
       // Anything that is not an API route falls through to the static assets.
-      if (env.ASSETS) return env.ASSETS.fetch(request);
+      if (env.ASSETS) {
+        /* /admin is the organiser console. It is served only to a signed-in
+           session; an anonymous request gets the same page with HTTP 401 so
+           the route is not an open door and crawlers see a non-200. */
+        if (path === '/admin' || path === '/admin.html') {
+          const inner = new Request(new URL('/admin.html', request.url).toString(), {
+            method: 'GET',
+            headers: request.headers
+          });
+          const res = await env.ASSETS.fetch(inner);
+          if (await adminSession(request, env)) return res;
+          const headers = new Headers(res.headers);
+          headers.set('cache-control', 'no-store');
+          headers.set('x-robots-tag', 'noindex, nofollow, noarchive');
+          return withSecurityHeaders(
+            new Response(res.body, { status: 401, statusText: 'Unauthorized', headers }),
+            request
+          );
+        }
+        return env.ASSETS.fetch(request);
+      }
       return respond(fail('Not found', 404));
     } catch (e) {
       console.error('unhandled error', (e && e.stack) || e);

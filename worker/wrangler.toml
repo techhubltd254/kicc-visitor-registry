@@ -1,6 +1,6 @@
 #:schema node_modules/wrangler/config-schema.json
 # =====================================================================
-#  KICC Visitor Registration — Cloudflare Worker + D1 + static assets
+#  KICC Visitor Registration — Cloudflare Worker + TiDB + static assets
 #  Deploy:  npm run deploy        (runs the build first, then wrangler)
 #  Secrets are NEVER stored here. See .dev.vars.example and README.md.
 # =====================================================================
@@ -14,15 +14,12 @@ compatibility_flags = ["nodejs_compat"]
 [assets]
 directory = "../public"
 binding = "ASSETS"
-run_worker_first = ["/api/*"]
+run_worker_first = ["/api/*", "/admin", "/admin.html"]
 
-# ---------- D1 database ----------
-[[d1_databases]]
-binding = "DB"
-database_name = "kicc-registry"
-# Fill this in after `wrangler d1 create kicc-registry`
-database_id = "a9f59135-195f-43df-8863-76dfc51b62c4"
-migrations_dir = "migrations"
+# ---------- no D1: TiDB is the only store ----------
+# The [[d1_databases]] binding was removed deliberately. With no D1 binding
+# and no DATABASE_URL the Worker throws instead of silently writing to an
+# empty second database. See docs/TIDB.md.
 
 # ---------- R2 bucket (badge PDFs, exports, backups) ----------
 [[r2_buckets]]

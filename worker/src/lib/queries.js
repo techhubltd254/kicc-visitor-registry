@@ -374,6 +374,16 @@ export const queueStats = () => ({
 
 /** Failed admin sign-ins from one IP hash inside the lockout window. */
 export function countFailedLogins(actorHash, since) {
+  /* Global by design: pass null to count EVERY failed sign-in in the window.
+     Scoping the count to one actor hash is what let a burst through before —
+     each request hashed to a different actor, so no single bucket ever reached
+     the threshold. */
+  if (!actorHash) {
+    return {
+      sql: `SELECT COUNT(*) AS n FROM audit_log WHERE action = 'login_failed' AND at >= ?`,
+      params: [since]
+    };
+  }
   return {
     sql: `SELECT COUNT(*) AS n FROM audit_log
            WHERE action = 'login_failed' AND actor = ? AND at >= ?`,

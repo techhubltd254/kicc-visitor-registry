@@ -97,9 +97,34 @@ async function requireAdmin(request, env) {
   return await verifySession(env, token);
 }
 
-/* Best-effort in-process lockout counter keyed by IP hash. Cloudflare reuses
-   warm isolates, so this trips immediately even if the audit-log read lags. */
-const loginFailures = new Map();
+/** Session cookie name. HttpOnly + Secure + SameSite=Strict, so the token is
+ *  never reachable from page JavaScript (a stolen XSS payload cannot read it). */
+export const ADMIN_COOKIE = 'kicc_admin';
+
+function sessionCookie(token, maxAgeSeconds) {
+  return `${ADMIN_COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${maxAgeSeconds}`;
+}
+
+function readCookie(request, name) {
+  const raw = request.headers.get('cookie') || '';
+  const m = raw.match(new RegExp('(?:^|;\\s*)' + name + '=([^;]*)'));
+  return m && m[1] ? decodeURIComponent(m[1]) : '';
+}
+
+/** Accepts a session from the HttpOnly cookie first, then the bearer header. */
+export async function adminSession(request, env) {
+  const fromCookie = readCookie(request, ADMIN_COOKIE);
+  if (fromCookie) {
+    const s = await verifySession(env, fromCookie);
+    if (s) return s;
+  }
+  return await requireAdmin(request, env);
+}
+
+/* The brute-force lockout is DB-backed and global. audit_log holds every failed
+   sign-in, and the count is deliberately NOT scoped to one IP hash: a burst can
+   arrive from many egress addresses and is spread over many isolates, so only a
+   single shared counter is reliable. The database is that counter. */
 
 /* ------------------------------------------------------------------ routes */
 
@@ -117,22 +142,27 @@ export async function adminRoute(path, request, env, ctx, cfg, db) {
     const lockoutMinutes = Number((cfg.admin && cfg.admin.lockoutMinutes) || 15);
     const maxFails = Number((cfg.admin && cfg.admin.maxFailedLogins) || 8);
     const ipHash = await hashIp(clientIp(request), envSecret(env, 'IP_SALT') || envSecret(env, 'SESSION_SECRET') || 'kicc');
-    const windowStart = Date.now() - lockoutMinutes * 60000;
-    const recent = (loginFailures.get(ipHash) || []).filter((t) => t > windowStart);
+    const since = sqlDateTime(new Date(Date.now() - lockoutMinutes * 60000));
 
-    let dbFails = 0;
+    /* Fail CLOSED: if the count cannot be read, refuse the sign-in rather than
+       silently treating it as zero — that silent catch is exactly what made the
+       previous version of this guard inert. */
+    let failed = 0;
     try {
-      const q = countFailedLogins(ipHash, sqlDateTime(new Date(windowStart)));
+      const q = countFailedLogins(null, since);
       const row = await db.first(q.sql, q.params);
-      dbFails = num(row && row.n);
+      failed = num(row && row.n);
     } catch (e) {
       console.error('lockout count failed:', (e && e.message) || e);
+      return fail('Sign-in is temporarily unavailable. Please try again shortly.', 503, {
+        code: 'LOCKOUT_CHECK_FAILED'
+      });
     }
-    if (recent.length >= maxFails || dbFails >= maxFails) {
+    if (failed >= maxFails) {
       return fail(
         `Too many failed sign-in attempts. Try again in ${lockoutMinutes} minutes.`,
         429,
-        { code: 'TOO_MANY_ATTEMPTS', retryAfterSeconds: lockoutMinutes * 60 }
+        { code: 'TOO_MANY_ATTEMPTS', retryAfterSeconds: lockoutMinutes * 60, attempts: failed }
       );
     }
 
@@ -141,25 +171,29 @@ export async function adminRoute(path, request, env, ctx, cfg, db) {
         actor: ipHash,
         action: 'login_failed',
         regId: null,
-        at: now(),
         detail: JSON.stringify({ ua: (request.headers.get('user-agent') || '').slice(0, 120) }),
         at: now()
       });
       await db.run(a.sql, a.params).catch((e) => console.error('audit insert failed:', (e && e.message) || e));
-      loginFailures.set(ipHash, [...recent, Date.now()]);
-      return fail('Incorrect passcode.', 401);
+      return fail('Incorrect passcode.', 401, { attempts: failed + 1 });
     }
-    loginFailures.delete(ipHash);
     const token = await issueSession(env, cfg.admin.sessionHours);
     const a = insertAudit({ actor: 'admin', action: 'login', at: now() });
     await db.run(a.sql, a.params).catch((e) => console.error('audit insert failed:', (e && e.message) || e));
-    return ok({ token, expiresInHours: cfg.admin.sessionHours });
+    const res = ok({ token, expiresInHours: cfg.admin.sessionHours });
+    res.headers.set('set-cookie', sessionCookie(token, cfg.admin.sessionHours * 3600));
+    res.headers.set('cache-control', 'no-store');
+    return res;
   }
 
-  if (path === '/api/admin/logout' && method === 'POST') return ok({ loggedOut: true });
+  if (path === '/api/admin/logout' && method === 'POST') {
+    const res = ok({ loggedOut: true });
+    res.headers.set('set-cookie', sessionCookie('', 0));
+    return res;
+  }
 
   /* ---- everything below requires a session ---- */
-  const session = await requireAdmin(request, env);
+  const session = await adminSession(request, env);
   if (!session) return fail('Not authorised. Please sign in again.', 401, { code: 'UNAUTHORISED' });
 
   if (path === '/api/admin/session' && method === 'GET') {

@@ -139,11 +139,15 @@ export class D1Adapter {
  */
 export function makeDb(env, deps = {}) {
   const url = env && env.DATABASE_URL ? String(env.DATABASE_URL).trim() : '';
-  if (url) return new TiDBAdapter(url, deps.connect || connect);
-  if (env && env.DB) return new D1Adapter(env.DB);
-  throw new Error(
-    'No database configured. Set the DATABASE_URL secret (TiDB) or bind D1 as DB.'
-  );
+  if (!url) {
+    /* TiDB is the only store. There is deliberately NO silent fallback: an
+       unset DATABASE_URL must fail loudly rather than quietly accept
+       registrations into a second, empty database. */
+    throw new Error(
+      'DATABASE_URL secret is not set. TiDB is the only configured store — refusing to fall back.'
+    );
+  }
+  return new TiDBAdapter(url, deps.connect || connect);
 }
 
 /** Which backend a request will use, without connecting. Never leaks credentials. */
@@ -162,13 +166,9 @@ export function dbStatus(env) {
     return { backend: 'tidb', driver: 'mysql-http', host, database, configured: true };
   }
   return {
-    backend: env && env.DB ? 'd1' : 'none',
-    driver: 'sqlite',
-    host: null,
-    database: 'kicc-registry',
-    configured: Boolean(env && env.DB),
-    note: env && env.DB
-      ? 'Running on the D1 fallback. Set the DATABASE_URL secret to switch to TiDB.'
-      : 'No database configured.'
+    backend: 'none',
+    driver: 'none',
+    configured: false,
+    note: 'DATABASE_URL is not set. TiDB is the only configured store.'
   };
 }

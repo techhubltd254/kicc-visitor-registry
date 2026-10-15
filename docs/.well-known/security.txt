@@ -1,0 +1,6 @@
+Contact: mailto:TECHHUBLTD254@GMAIL.COM
+Contact: tel:+254706018491
+Expires: 2027-10-12T00:00:00.000Z
+Preferred-Languages: en, sw
+Canonical: https://kiccvisitorsregistration.co.ke/.well-known/security.txt
+Policy: https://kiccvisitorsregistration.co.ke/privacy.html

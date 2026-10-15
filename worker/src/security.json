@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-15T06:06:18.345Z",
+  "generatedAt": "2026-10-15T06:28:10.081Z",
   "note": "sha256 hashes of inline <script> blocks — regenerate with `npm run build` after editing HTML",
   "sources": [
     "public/admin.html (1)",

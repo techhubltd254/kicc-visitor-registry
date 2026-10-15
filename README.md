@@ -70,7 +70,7 @@ are retried with exponential backoff.
 | **Automatic confirmation email** | `worker/src/lib/email.js` + `templates/confirmation.js` | Resend, MailChannels or your own webhook; branded HTML + plain text, sent in the background |
 | **Per-delegate QR badge** | `worker/src/lib/badge.js` + `public/badge.html` | HMAC-signed token; a badge cannot be forged |
 | **Door check-in** | `public/checkin.html` + `checkin.js` | Camera scanning (vendored jsQR) with manual fallback, per-gate logging, vibrate feedback |
-| Organiser console | `public/admin.html` + `admin.js` | KPIs, search, filters, pagination, check-in/undo, delete |
+| Organiser console | `public/admin` + `admin.js` | KPIs, search, filters, pagination, check-in/undo, delete |
 | **CSV export** | `/api/admin/export.csv` | UTF-8 BOM + ISO dates, opens cleanly in Excel |
 | Event manager | `/api/admin/events` | Add and edit events from the console; DB is the source of truth |
 | Runtime event branding | `config/event.config.json` | One file drives colours, copy, categories, countries and events |
@@ -325,7 +325,7 @@ npm run verify       # pre-deploy checks
 ```
 
 **On the event day:** open `/checkin.html` on each scanner phone, pick the gate,
-grant camera permission. The organiser console at `/admin.html` shows live
+grant camera permission. The organiser console at `/admin` shows live
 numbers and can export at any time.
 
 ---
