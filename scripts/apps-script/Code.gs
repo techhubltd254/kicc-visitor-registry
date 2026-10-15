@@ -1,30 +1,36 @@
 /**
  * Google Apps Script — KICC registration → Google Sheets
  * =====================================================================
- * Paste this into a new Apps Script project bound to your spreadsheet
- * (Extensions → Apps Script), then deploy it as a Web App.
+ * Receives POSTs from the Cloudflare Worker (kicc-visitor-registry).
  *
- * SETUP
- *   1. Create a Google Sheet. Name the tab "KICC Registrations".
- *   2. Extensions → Apps Script → delete the stub → paste this file.
- *   3. Set SHARED_SECRET below to a long random string.
- *   4. Deploy → New deployment → Web app
- *        Execute as:  Me
- *        Who has access: Anyone
- *      Copy the /exec URL.
- *   5. In the Worker:
- *        wrangler secret put SHEETS_WEBHOOK_URL     # the /exec URL
- *        wrangler secret put SHEETS_SHARED_SECRET   # the same SHARED_SECRET
+ * SECRET HANDLING — IMPORTANT
+ *   This file lives in a PUBLIC GitHub repository, so the shared secret must
+ *   NEVER be written into it. It is stored in Script Properties instead
+ *   (Project Settings → Script Properties, or run setSharedSecret once).
+ *   The Worker sends the same value in the POST body field `secret`.
  *
- * SECURITY
- *   The shared secret is checked on every request. Because the endpoint is
- *   public, treat the secret as the only gate: use a long random value, and
- *   rotate it if it is ever exposed. The script only ever appends rows.
+ * PAYLOAD CONTRACT (keep these 16 fields and their order):
+ *   { secret, sheet, record: {
+ *       registeredAt, regId, fullName, email, phone, organisation, country,
+ *       idNumber, event, eventDates, venue, category, days, requirements,
+ *       consent, checkedIn } }
+ *
+ * DEPLOYMENT
+ *   Deploy → New deployment → Web app
+ *     Execute as:      Me
+ *     Who has access:  Anyone
+ *   Then copy the /exec URL into the Worker:
+ *     npx wrangler secret put SHEETS_WEBHOOK_URL --config worker/wrangler.toml
+ *
+ * AFTER ANY EDIT: Deploy → Manage deployments → pencil → Version: New version.
+ * That keeps the existing /exec URL. "New deployment" creates a NEW URL and
+ * you must re-set SHEETS_WEBHOOK_URL.
  * =====================================================================
  */
 
-var SHARED_SECRET = 'CHANGE_ME_to_a_long_random_string';
-var SHEET_NAME = 'KICC Registrations';
+var SECRET_PROP = 'SHEETS_SHARED_SECRET';
+var SHEET_ID_PROP = 'SHEET_ID';           // only needed for a standalone script
+var DEFAULT_SHEET_NAME = 'KICC Registrations';
 
 var HEADERS = [
   'Registered at', 'Reg. number', 'Full name', 'Email', 'Phone',
@@ -41,21 +47,30 @@ function doPost(e) {
   }
 
   try {
-    if (!e || !e.postData || !e.postData.contents) return json({ ok: false, error: 'empty body' });
+    if (!e || !e.postData || !e.postData.contents) {
+      return json({ ok: false, error: 'empty body' });
+    }
 
     var body = JSON.parse(e.postData.contents);
-    if (String(body.secret || '') !== SHARED_SECRET) {
+
+    if (!secretMatches(body.secret)) {
       return json({ ok: false, error: 'unauthorised' });
     }
-    if (!body.record) return json({ ok: false, error: 'no record' });
+    if (!body.record || !body.record.regId) {
+      return json({ ok: false, error: 'no record' });
+    }
 
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName(body.sheet || SHEET_NAME) || ss.insertSheet(body.sheet || SHEET_NAME);
+    var ss = targetSpreadsheet();
+    if (!ss) return json({ ok: false, error: 'no spreadsheet bound or configured' });
+
+    var wanted = body.sheet || DEFAULT_SHEET_NAME;
+    var sheet = ss.getSheetByName(wanted) || ss.insertSheet(wanted);
     ensureHeaders(sheet);
 
     var r = body.record;
 
-    // Idempotent: never append the same registration number twice.
+    // Idempotent: the Worker retries failed pushes from a cron queue, so the
+    // same regId can legitimately arrive more than once. Never append twice.
     var existing = sheet.getLastRow() > 1
       ? sheet.getRange(2, 2, sheet.getLastRow() - 1, 1).getValues().map(function (row) { return row[0]; })
       : [];
@@ -64,9 +79,10 @@ function doPost(e) {
     }
 
     sheet.appendRow([
-      r.registeredAt, r.regId, r.fullName, r.email, r.phone,
-      r.organisation, r.country, r.idNumber, r.event, r.eventDates,
-      r.venue, r.category, r.days, r.requirements, r.consent, r.checkedIn
+      r.registeredAt || '', r.regId || '', r.fullName || '', r.email || '', r.phone || '',
+      r.organisation || '', r.country || '', r.idNumber || '', r.event || '',
+      r.eventDates || '', r.venue || '', r.category || '', r.days || '',
+      r.requirements || '', r.consent || '', r.checkedIn || ''
     ]);
 
     return json({ ok: true, appended: r.regId, rows: sheet.getLastRow() - 1 });
@@ -77,33 +93,97 @@ function doPost(e) {
   }
 }
 
-/** Simple ping so you can confirm the deployment from a browser. */
+/** Ping so you can confirm the deployment straight from a browser. */
 function doGet() {
-  return json({ ok: true, service: 'KICC registration → Google Sheets', time: new Date().toISOString() });
+  return json({
+    ok: true,
+    service: 'KICC registration -> Google Sheets',
+    secretConfigured: sharedSecret() !== '',
+    spreadsheet: Boolean(targetSpreadsheet()),
+    time: new Date().toISOString()
+  });
+}
+
+/** Bound to a spreadsheet when created from Extensions → Apps Script;
+ *  falls back to the SHEET_ID script property for a standalone script. */
+function targetSpreadsheet() {
+  try {
+    var active = SpreadsheetApp.getActiveSpreadsheet();
+    if (active) return active;
+  } catch (err) { /* standalone */ }
+  var id = PropertiesService.getScriptProperties().getProperty(SHEET_ID_PROP);
+  return id ? SpreadsheetApp.openById(id) : null;
 }
 
 function ensureHeaders(sheet) {
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(HEADERS);
-    sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold').setBackground('#0B2536').setFontColor('#FFFFFF');
+    sheet.getRange(1, 1, 1, HEADERS.length)
+      .setFontWeight('bold')
+      .setBackground('#0B2536')
+      .setFontColor('#FFFFFF');
     sheet.setFrozenRows(1);
     sheet.setColumnWidth(3, 220);
     sheet.setColumnWidth(4, 240);
   }
 }
 
-function json(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+function sharedSecret() {
+  return PropertiesService.getScriptProperties().getProperty(SECRET_PROP) || '';
 }
 
-/**
- * Optional: run once to add a checkbox column and a status dropdown to an
- * existing sheet, so desk staff can tick people in from the spreadsheet too.
- */
-function addCheckinHelpers() {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
-  if (!sheet) return;
-  var last = sheet.getLastRow();
-  if (last < 2) return;
-  sheet.getRange(2, 16, last - 1, 1).insertCheckboxes();
+/** Length-safe comparison; avoids leaking the position of the first mismatch. */
+function secretMatches(candidate) {
+  var expected = sharedSecret();
+  if (!expected) return false;
+  var a = String(candidate || '');
+  if (a.length !== expected.length) return false;
+  var diff = 0;
+  for (var i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ expected.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+function json(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+/** RUN ONCE. Prompts for the secret and stores it in Script Properties. */
+function setSharedSecret() {
+  var ui = SpreadsheetApp.getUi();
+  var res = ui.prompt('Paste the SHEETS_SHARED_SECRET from Cloudflare',
+                      ui.ButtonSet.OK_CANCEL);
+  if (res.getSelectedButton() !== ui.Button.OK) return;
+  var value = (res.getResponseText() || '').trim();
+  if (value.length < 32) {
+    ui.alert('Too short. Use at least 32 characters (openssl rand -hex 32 gives 64).');
+    return;
+  }
+  PropertiesService.getScriptProperties().setProperty(SECRET_PROP, value);
+  ui.alert('Saved. Length ' + value.length + '. Now deploy as a Web app.');
+}
+
+/** RUN ONCE if the script is standalone (not bound): stores the spreadsheet id. */
+function setSpreadsheetId() {
+  var ui = SpreadsheetApp.getUi();
+  var res = ui.prompt('Paste the spreadsheet ID from its URL (/d/<ID>/edit)',
+                      ui.ButtonSet.OK_CANCEL);
+  if (res.getSelectedButton() !== ui.Button.OK) return;
+  var value = (res.getResponseText() || '').trim();
+  PropertiesService.getScriptProperties().setProperty(SHEET_ID_PROP, value);
+  ui.alert('Saved. Open the sheet now succeeds: ' + Boolean(targetSpreadsheet()));
+}
+
+/** Prints configuration state WITHOUT revealing the secret. View → Logs. */
+function checkSetup() {
+  var s = sharedSecret();
+  Logger.log('Secret set : ' + (s ? 'yes, ' + s.length + ' chars' : 'NO — run setSharedSecret'));
+  var ss = targetSpreadsheet();
+  Logger.log('Spreadsheet: ' + (ss ? ss.getName() : 'NONE — run setSpreadsheetId'));
+  if (ss) {
+    Logger.log('Tab "' + DEFAULT_SHEET_NAME + '" exists: ' +
+      Boolean(ss.getSheetByName(DEFAULT_SHEET_NAME)));
+  }
 }
