@@ -216,7 +216,7 @@ export const insertAudit = ({ actor, action, regId, detail, at }) => ({
     regId || null,
     detail == null ? null : String(detail).slice(0, 2000),
     at
-  ]
+  ].map((v) => (v === undefined ? null : v))
 });
 
 /* ------------------------------------------------------------------ admin listing */
@@ -371,3 +371,12 @@ export const queueStats = () => ({
         FROM sync_queue`,
   params: []
 });
+
+/** Failed admin sign-ins from one IP hash inside the lockout window. */
+export function countFailedLogins(actorHash, since) {
+  return {
+    sql: `SELECT COUNT(*) AS n FROM audit_log
+           WHERE action = 'login_failed' AND actor = ? AND at >= ?`,
+    params: [actorHash, since]
+  };
+}

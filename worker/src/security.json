@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2026-10-15T06:04:40.307Z",
+  "note": "sha256 hashes of inline <script> blocks — regenerate with `npm run build` after editing HTML",
+  "sources": [
+    "public/admin.html (1)",
+    "public/index.html (1)",
+    "public/privacy.html (1)",
+    "docs/admin.html (1)",
+    "docs/index.html (1)",
+    "docs/privacy.html (1)"
+  ],
+  "scripts": [
+    "'sha256-+MV0oXZy/lHcgejP8pUvbXohN3JKB24MECSKZfTI4Mc='",
+    "'sha256-COpJeiCSJfZg0GZyPrvapNre1Vl0MwC7oukdVJA6DnY='",
+    "'sha256-ua0jbKW8cmhzM4c36l8XODmRHVJqZUFhhuL5DXpXrkk='"
+  ]
+}

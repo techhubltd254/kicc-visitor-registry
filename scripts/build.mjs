@@ -257,3 +257,6 @@ console.log(`
   QR badges     : ${cfg.features.qrBadge ? 'on' : 'off'}
   TIDC sync     : ${cfg.features.tidcSync ? 'ON (provider unverified!)' : 'off'}
 `);
+
+// CSP hashes must be computed after the HTML files are written.
+await import('./security-hashes.mjs');

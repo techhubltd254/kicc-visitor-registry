@@ -117,7 +117,9 @@
   },
   "admin": {
     "sessionHours": 12,
-    "pageSize": 50
+    "pageSize": 50,
+    "maxFailedLogins": 8,
+    "lockoutMinutes": 15
   },
   "checkin": {
     "gates": [

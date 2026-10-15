@@ -1,0 +1,9 @@
+# kiccvisitorsregistration.co.ke — KICC visitor registration
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin.html
+Disallow: /checkin
+Disallow: /checkin.html
+Disallow: /badge.html
+Disallow: /api/

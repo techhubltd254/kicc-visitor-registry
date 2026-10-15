@@ -5,7 +5,7 @@
  * runs unchanged on TiDB (MySQL) or D1 (SQLite).
  */
 
-import { ok, fail, readJson, csvResponse } from '../lib/http.js';
+import { ok, fail, readJson, csvResponse, clientIp, hashIp } from '../lib/http.js';
 import {
   sha256Hex,
   timingSafeEqual,
@@ -35,8 +35,7 @@ import {
   statsTotals,
   statsByEvent,
   statsByCategory,
-  statsRecent
-} from '../lib/queries.js';
+  statsRecent, countFailedLogins } from '../lib/queries.js';
 
 /* ------------------------------------------------------------------ auth */
 
@@ -108,19 +107,36 @@ export async function adminRoute(path, request, env, ctx, cfg, db) {
   /* ---- login / logout / session ---- */
   if (path === '/api/admin/login' && method === 'POST') {
     const body = await readJson(request);
+    /* --- brute-force guard: per-IP lockout, counted from audit_log ---------- */
+    const lockoutMinutes = Number((cfg.admin && cfg.admin.lockoutMinutes) || 15);
+    const maxFails = Number((cfg.admin && cfg.admin.maxFailedLogins) || 8);
+    const since = sqlDateTime(new Date(Date.now() - lockoutMinutes * 60000));
+    const ipHash = await hashIp(clientIp(request), envSecret(env, 'IP_SALT') || envSecret(env, 'SESSION_SECRET') || 'kicc');
+    const failsQ = countFailedLogins(ipHash, since);
+    const fails = await db.first(failsQ.sql, failsQ.params);
+    if (num(fails && fails.n) >= maxFails) {
+      return fail(
+        `Too many failed sign-in attempts. Try again in ${lockoutMinutes} minutes.`,
+        429,
+        { code: 'TOO_MANY_ATTEMPTS', retryAfterSeconds: lockoutMinutes * 60 }
+      );
+    }
+
     if (!(await passcodeMatches(env, body.passcode))) {
       const a = insertAudit({
-        actor: 'unknown',
+        actor: ipHash,
         action: 'login_failed',
+        regId: null,
+        at: now(),
         detail: JSON.stringify({ ua: (request.headers.get('user-agent') || '').slice(0, 120) }),
         at: now()
       });
-      await db.run(a.sql, a.params).catch(() => {});
+      await db.run(a.sql, a.params).catch((e) => console.error('audit insert failed:', (e && e.message) || e));
       return fail('Incorrect passcode.', 401);
     }
     const token = await issueSession(env, cfg.admin.sessionHours);
     const a = insertAudit({ actor: 'admin', action: 'login', at: now() });
-    await db.run(a.sql, a.params).catch(() => {});
+    await db.run(a.sql, a.params).catch((e) => console.error('audit insert failed:', (e && e.message) || e));
     return ok({ token, expiresInHours: cfg.admin.sessionHours });
   }
 
@@ -231,7 +247,7 @@ export async function adminRoute(path, request, env, ctx, cfg, db) {
       detail: JSON.stringify({ rows: body.length }),
       at: now()
     });
-    await db.run(a.sql, a.params).catch(() => {});
+    await db.run(a.sql, a.params).catch((e) => console.error('audit insert failed:', (e && e.message) || e));
 
     const stamp = new Date().toISOString().slice(0, 10);
     return csvResponse(body, header, `kicc-registry-${stamp}.csv`);
@@ -271,7 +287,7 @@ export async function adminRoute(path, request, env, ctx, cfg, db) {
         detail: JSON.stringify(body).slice(0, 500),
         at
       });
-      await db.run(a.sql, a.params).catch(() => {});
+      await db.run(a.sql, a.params).catch((e) => console.error('audit insert failed:', (e && e.message) || e));
 
       const freshQ = findRegistration(id);
       const fresh = await db.first(freshQ.sql, freshQ.params);
@@ -288,7 +304,7 @@ export async function adminRoute(path, request, env, ctx, cfg, db) {
         detail: JSON.stringify({ name: existing.name, email: existing.email }),
         at: now()
       });
-      await db.run(a.sql, a.params).catch(() => {});
+      await db.run(a.sql, a.params).catch((e) => console.error('audit insert failed:', (e && e.message) || e));
       return ok({ deleted: id });
     }
   }

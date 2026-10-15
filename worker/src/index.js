@@ -23,6 +23,7 @@
 
 import config from './config.json';
 import { ok, fail, preflight, withCors, readJson, clientIp, hashIp } from './lib/http.js';
+import { withSecurityHeaders } from './lib/security.js';
 import { newRegistrationId } from './lib/crypto.js';
 import { makeDb, dbStatus, sqlDateTime, hoursAgo, num } from './lib/db.js';
 import { makeBadgeToken, resolveBadge } from './lib/badge.js';
@@ -332,7 +333,7 @@ async function badgeLookup(request, env, db) {
 
 /* ------------------------------------------------------------------ worker */
 
-export default {
+const workerHandler = {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '') || '/';
@@ -400,4 +401,16 @@ export default {
       })()
     );
   }
+};
+
+/* Every response — the HTML pages from ASSETS and the JSON API — leaves through
+   here, so the security headers cannot be forgotten on a new route. */
+export default {
+  async fetch(request, env, ctx) {
+    const response = await workerHandler.fetch(request, env, ctx);
+    /* Every response — HTML from ASSETS and the JSON API — leaves through here. */
+    return withSecurityHeaders(response, request);
+  },
+  /* Cron must stay on the default export: drain the outbound sync queue. */
+  scheduled: (event, env, ctx) => workerHandler.scheduled(event, env, ctx)
 };

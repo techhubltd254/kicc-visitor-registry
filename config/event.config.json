@@ -30,9 +30,9 @@
   "hero": {
     "eyebrow": "Visitor & Delegate Registration",
     "title": "Register to visit KICC",
-    "subtitle": "Complete the short form to secure your visitor pass. Your registration number and QR badge are issued instantly — show them at the accreditation desk on arrival.",
+    "subtitle": "Complete the short form to secure your visitor pass. Your registration number and QR badge are issued instantly \u2014 show them at the accreditation desk on arrival.",
     "chips": [
-      "KICC, Nairobi · Harambee Avenue",
+      "KICC, Nairobi \u00b7 Harambee Avenue",
       "Free delegate registration",
       "QR badge issued instantly"
     ]
@@ -101,7 +101,7 @@
     "fromName": "KICC Events",
     "fromEmail": "events@kiccvisitorsregistration.co.ke",
     "replyTo": "events@kicc.co.ke",
-    "subject": "Your KICC registration — {{regId}}",
+    "subject": "Your KICC registration \u2014 {{regId}}",
     "attachIcs": true
   },
   "integrations": {
@@ -112,12 +112,14 @@
       "publicKeyEnvVar": "TIDC_PUBLIC_KEY",
       "privateKeyEnvVar": "TIDC_PRIVATE_KEY",
       "apiBaseEnvVar": "TIDC_API_BASE",
-      "note": "UNVERIFIED PROVIDER — the supplied TIDC ID / Public Key / Private Key do not match any publicly documented API. The adapter is a pluggable stub: set the env vars and TIDC_API_BASE and implement the request shape in worker/src/lib/tidc.js once the provider's docs are available."
+      "note": "UNVERIFIED PROVIDER \u2014 the supplied TIDC ID / Public Key / Private Key do not match any publicly documented API. The adapter is a pluggable stub: set the env vars and TIDC_API_BASE and implement the request shape in worker/src/lib/tidc.js once the provider's docs are available."
     }
   },
   "admin": {
     "sessionHours": 12,
-    "pageSize": 50
+    "pageSize": 50,
+    "maxFailedLogins": 8,
+    "lockoutMinutes": 15
   },
   "checkin": {
     "gates": [
@@ -144,7 +146,7 @@
     {
       "id": "biz-invest-expo-2026",
       "name": "KICC Business & Investment Expo 2026",
-      "dates": "18 – 20 November 2026",
+      "dates": "18 \u2013 20 November 2026",
       "startDate": "2026-11-18",
       "endDate": "2026-11-20",
       "venue": "Tsavo Ballroom",
@@ -155,7 +157,7 @@
     {
       "id": "ea-tourism-forum-2026",
       "name": "East Africa Tourism & Hospitality Forum",
-      "dates": "3 – 4 December 2026",
+      "dates": "3 \u2013 4 December 2026",
       "startDate": "2026-12-03",
       "endDate": "2026-12-04",
       "venue": "Lenana Hall",
@@ -177,7 +179,7 @@
     {
       "id": "agri-business-conf-2027",
       "name": "Kenya Agri-Business Conference",
-      "dates": "12 – 13 February 2027",
+      "dates": "12 \u2013 13 February 2027",
       "startDate": "2027-02-12",
       "endDate": "2027-02-13",
       "venue": "Tsavo Ballroom",
@@ -188,7 +190,7 @@
     {
       "id": "health-medtech-congress-2027",
       "name": "Continental Health & MedTech Congress",
-      "dates": "9 – 11 March 2027",
+      "dates": "9 \u2013 11 March 2027",
       "startDate": "2027-03-09",
       "endDate": "2027-03-11",
       "venue": "Mount Kenya Hall",
