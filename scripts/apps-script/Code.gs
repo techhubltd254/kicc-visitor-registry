@@ -150,30 +150,55 @@ function json(obj) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-/** RUN ONCE. Prompts for the secret and stores it in Script Properties. */
+/**
+ * Shows a message. Container-bound scripts get a dialog; a STANDALONE project
+ * has no UI, so SpreadsheetApp.getUi() throws and we fall back to Logger.
+ */
+function tell(msg) {
+  try {
+    SpreadsheetApp.getUi().alert(msg);
+  } catch (err) {
+    Logger.log(msg);
+  }
+}
+
+/**
+ * Asks for a value, or returns null. SpreadsheetApp.getUi() throws in a
+ * standalone project, so that case is handled rather than crashing.
+ */
+function promptUser(label) {
+  try {
+    var ui = SpreadsheetApp.getUi();
+    var res = ui.prompt(label, ui.ButtonSet.OK_CANCEL);
+    if (res.getSelectedButton() !== ui.Button.OK) return null;
+    return (res.getResponseText() || '').trim();
+  } catch (err) {
+    Logger.log('This project has no UI (it is a standalone script).');
+    Logger.log('Instead: Project Settings (gear icon) -> Script properties ->');
+    Logger.log('  Add script property: SHEETS_SHARED_SECRET = <your secret>');
+    Logger.log('  Add script property: SHEET_ID = <spreadsheet id from its URL>');
+    return null;
+  }
+}
+
+/** RUN ONCE. Stores the shared secret (dialog when bound, else use Project Settings). */
 function setSharedSecret() {
-  var ui = SpreadsheetApp.getUi();
-  var res = ui.prompt('Paste the SHEETS_SHARED_SECRET from Cloudflare',
-                      ui.ButtonSet.OK_CANCEL);
-  if (res.getSelectedButton() !== ui.Button.OK) return;
-  var value = (res.getResponseText() || '').trim();
+  var value = promptUser('Paste the SHEETS_SHARED_SECRET from Cloudflare');
+  if (value === null) return;
   if (value.length < 32) {
-    ui.alert('Too short. Use at least 32 characters (openssl rand -hex 32 gives 64).');
+    tell('Too short. Use at least 32 chars (openssl rand -hex 32 gives 64).');
     return;
   }
   PropertiesService.getScriptProperties().setProperty(SECRET_PROP, value);
-  ui.alert('Saved. Length ' + value.length + '. Now deploy as a Web app.');
+  tell('Saved. Length ' + value.length + '. Now deploy as a Web app.');
 }
 
-/** RUN ONCE if the script is standalone (not bound): stores the spreadsheet id. */
+/** RUN ONCE if standalone: stores the spreadsheet id. */
 function setSpreadsheetId() {
-  var ui = SpreadsheetApp.getUi();
-  var res = ui.prompt('Paste the spreadsheet ID from its URL (/d/<ID>/edit)',
-                      ui.ButtonSet.OK_CANCEL);
-  if (res.getSelectedButton() !== ui.Button.OK) return;
-  var value = (res.getResponseText() || '').trim();
+  var value = promptUser('Paste the spreadsheet ID from its URL (/d/<ID>/edit)');
+  if (value === null || !value) return;
   PropertiesService.getScriptProperties().setProperty(SHEET_ID_PROP, value);
-  ui.alert('Saved. Open the sheet now succeeds: ' + Boolean(targetSpreadsheet()));
+  tell('Saved. Spreadsheet now opens: ' + Boolean(targetSpreadsheet()));
 }
 
 /** Prints configuration state WITHOUT revealing the secret. View → Logs. */
